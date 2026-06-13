@@ -1,14 +1,17 @@
 import { useSearchStore } from '../store/search.store'
+import { useCompareStore } from '../store/compare.store'
 import SearchBar from '../components/search/SearchBar'
 import SearchFilters from '../components/search/SearchFilters'
 import RepoCard from '../components/repos/RepoCard'
+import CompareBar from '../components/repos/CompareBar'
 
 export default function SearchPage() {
   const { results, totalCount, totalPages, currentPage, isLoading, error, hasSearched, changePage } =
     useSearchStore()
+  const { selected, addRepo } = useCompareStore()
 
   return (
-    <div className="min-h-screen bg-gray-950">
+    <div className="min-h-screen bg-gray-950 pb-20">
       {/* Header */}
       <header className="border-b border-gray-800 px-6 py-4">
         <div className="max-w-5xl mx-auto flex items-center gap-3">
@@ -20,7 +23,6 @@ export default function SearchPage() {
       </header>
 
       <main className="max-w-5xl mx-auto px-6 py-8">
-        {/* Hero */}
         {!hasSearched && (
           <div className="text-center mb-10">
             <h1 className="text-3xl font-bold text-gray-100 mb-2">
@@ -32,13 +34,11 @@ export default function SearchPage() {
           </div>
         )}
 
-        {/* Search */}
         <div className="space-y-3 mb-6">
           <SearchBar />
           <SearchFilters />
         </div>
 
-        {/* Results */}
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
             <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
@@ -58,15 +58,22 @@ export default function SearchPage() {
               <p className="text-sm text-gray-400">
                 {totalCount.toLocaleString()} repositories found
               </p>
+              <p className="text-xs text-gray-500">
+                Click "+ Compare" on up to 3 repos to compare them
+              </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
               {results.map((repo) => (
-                <RepoCard key={repo.id} repo={repo} />
+                <RepoCard
+                  key={repo.id}
+                  repo={repo}
+                  onAddToCompare={addRepo}
+                  isInCompare={!!selected.find((r) => r.id === repo.id)}
+                />
               ))}
             </div>
 
-            {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex items-center justify-center gap-2">
                 <button
@@ -101,6 +108,8 @@ export default function SearchPage() {
           </>
         ) : null}
       </main>
+
+      <CompareBar />
     </div>
   )
 }
